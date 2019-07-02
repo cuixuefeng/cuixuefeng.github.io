@@ -14,9 +14,9 @@ future: true
 # SNS settings
 RSS: false
 weibo_username:     iamgoingnowhere
-zhihu_username:     chenhaoxinrepo
-github_username:    jikehaohao
-twitter_username:   jikehaohao
+zhihu_username:     cuizhazha
+github_username:    cuizhazha
+twitter_username:   cuizhazha
 #linkedin_username:  firstname-lastname-idxxxx
 
 
