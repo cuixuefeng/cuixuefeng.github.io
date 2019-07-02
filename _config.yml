@@ -13,7 +13,7 @@ future: true
 
 # SNS settings
 RSS: false
-weibo_username:     chenhaoxinrepo
+weibo_username:     iamgoingnowhere
 zhihu_username:     chenhaoxinrepo
 github_username:    jikehaohao
 twitter_username:   jikehaohao
@@ -58,7 +58,7 @@ kramdown:
 
 
 # Disqus settings
-disqus_username: jikehaohao
+disqus_username: cuizhazha
 
 # Netease settings
 netease_comment: false
@@ -71,7 +71,7 @@ netease_comment: false
 
 # Google Analytics
 ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
-ga_domain: jikehaohao.me
+ga_domain: cuizhazha.com
 
 
 
@@ -100,22 +100,22 @@ page-mathjax: false
 
 
 # Friends
-friends-url: [
-    {
-        title: "鸟哥Linux私房菜篇",
-        href: "http://linux.vbird.org/"
-    },{
-        title: "菜鸟奔袭",
-        href: "http://www.runoob.com/"
-    },{
-        title: "博客园创想天地",
-        href: "https://i.cnblogs.com/posts/"
-    },{
-        title: "前端组件大全",
-        href: "https://v3.bootcss.com/components/"
-    },{
-        title: "前端在线",
-        href: "https://runjs.cn/code"
-    }
-]
+# friends-url: [
+#     {
+#         title: "鸟哥Linux私房菜篇",
+#         href: "http://linux.vbird.org/"
+#     },{
+#         title: "菜鸟奔袭",
+#         href: "http://www.runoob.com/"
+#     },{
+#         title: "博客园创想天地",
+#         href: "https://i.cnblogs.com/posts/"
+#     },{
+#         title: "前端组件大全",
+#         href: "https://v3.bootcss.com/components/"
+#     },{
+#         title: "前端在线",
+#         href: "https://runjs.cn/code"
+#     }
+# ]
 
