@@ -1,11 +1,11 @@
 # Site settings
-title: 极客浩浩
-SEOTitle: 陈浩鑫的博客 | jikehaohao Blog
+title: cuizhahza's coding
+SEOTitle: cuizhazha | cuizhazha Blog
 header-img: img/home-bg.jpg
 email: chenhaoxin@finupgroup.com
-description: "当你的才华撑不起你的野心时，只有静下心来好好学习！"
-keyword: "陈浩鑫,Chen浩鑫,海贼迷，动漫爱好者，王者荣耀，吃鸡大神，互联网,python,运维,开发工程师,设计,努力&不服输&爱拼&极客"
-url: "https://jikehaohao.github.io/"              # your host, for absolute URL
+description: " talk is cheap show me the code！"
+keyword: "cuizhazha,cuimohan,cuixuefeng，PHP是世界上最好的语言"
+url: "https://cuizhazha.github.io/"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
