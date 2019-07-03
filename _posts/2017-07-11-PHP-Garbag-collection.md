@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "PHP面试技巧-垃圾回收机制"
+title: "PHP面试技巧"
 subtitle: "PHP interview skills-garbage collection mechanism
 "
 author: "cuizhazha"
@@ -10,6 +10,11 @@ tags:
   - PHP面试
   - PHP
 ---
+PHP
+# 一次php请求过程图解
+![](https://i.vgy.me/3N5ETC.png)
+
+# php 的垃圾回收机制
 PHP 使用了引用计数 (reference counting) GC 机制, PHP 可以自动进行内存管理，清除不需要的对象。
 
 每个对象都内含一个引用计数器 refcount，每个 reference 连接到对象，计数器加 1。当 reference 离开生存空间或被设为 NULL，计数器减 1。当某个对象的引用计数器为零时，PHP 知道你将不再需要使用这个对象，释放其所占的内存空间。
