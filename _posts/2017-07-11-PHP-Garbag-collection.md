@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "PHP面试技巧"
+title: "PHP面试技巧(-) 垃圾回收相关"
 subtitle: "PHP interview skills-garbage collection mechanism
 "
 author: "cuizhazha"
@@ -9,6 +9,8 @@ header-bg-css: "linear-gradient(to right, #24b94a, #38ef7d);"
 tags:
   - PHP面试
   - PHP
+  - 垃圾回收
+  - session
 ---
 PHP
 # 一次php请求过程图解
