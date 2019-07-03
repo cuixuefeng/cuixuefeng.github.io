@@ -1,7 +1,7 @@
 /* ===========================================================
  * sw.js
  * ===========================================================
- * Copyright 2016 @jikehaohao
+ * Copyright 2016 @huxpro
  * Licensed under Apache 2.0
  * service worker scripting
  * ========================================================== */
@@ -31,7 +31,7 @@ const PRECACHE_LIST = [
 ]
 const HOSTNAME_WHITELIST = [
   self.location.hostname,
-  "jikehaohao.me",
+  "huangxuan.me",
   "yanshuo.io",
   "cdnjs.cloudflare.com"
 ]

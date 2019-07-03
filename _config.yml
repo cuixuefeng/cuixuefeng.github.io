@@ -1,11 +1,11 @@
 # Site settings
-title: cuizhazha
-SEOTitle: cuizhazha | cuizhazha Blog
+title: cuizhazha Blog
+SEOTitle: cuizhazha 
 header-img: img/home-bg.jpg
-email: chenhaoxin@finupgroup.com
-description: " talk is cheap show me the code！"
-keyword: "cuizhazha,cuimohan,cuixuefeng，PHP是世界上最好的语言"
-url: "https://cuizhazha.github.io/"              # your host, for absolute URL
+email: 277433031@qq.com
+description: "cuimohan,cuixuefeng,cuizhazha,黑客与画家，PHP是世界上最好的语言"
+keyword: " Web, PHP, Hacker"
+url: "https://cuixuefeng.github.io"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
@@ -13,10 +13,11 @@ future: true
 
 # SNS settings
 RSS: false
-weibo_username:     iamgoingnowhere
-zhihu_username:     cuizhazha
-github_username:    cuizhazha
-twitter_username:   cuizhazha
+weibo_username:     cmh888
+zhihu_username:     cuimohan
+github_username:    cuixuefeng
+twitter_username:   cuimohan
+#facebook_username:  huxpro
 #linkedin_username:  firstname-lastname-idxxxx
 
 
@@ -58,7 +59,7 @@ kramdown:
 
 
 # Disqus settings
-disqus_username: cuizhazha
+disqus_username: cuimohan
 
 # Netease settings
 netease_comment: false
@@ -71,7 +72,7 @@ netease_comment: false
 
 # Google Analytics
 ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
-ga_domain: cuizhazha.com
+ga_domain: cuimohan.me
 
 
 
@@ -100,22 +101,15 @@ page-mathjax: false
 
 
 # Friends
-# friends-url: [
-#     {
-#         title: "鸟哥Linux私房菜篇",
-#         href: "http://linux.vbird.org/"
-#     },{
-#         title: "菜鸟奔袭",
-#         href: "http://www.runoob.com/"
-#     },{
-#         title: "博客园创想天地",
-#         href: "https://i.cnblogs.com/posts/"
-#     },{
-#         title: "前端组件大全",
-#         href: "https://v3.bootcss.com/components/"
-#     },{
-#         title: "前端在线",
-#         href: "https://runjs.cn/code"
-#     }
-# ]
-
+friends: [
+    {
+        title: "廖雪峰",
+        href: "https://www.liaoxuefeng.com/"
+    },{
+        title: "Linux鸟哥",
+        href: "http://linux.vbird.org/"
+    },{
+        title: "laruence",
+        href: "http://www.laruence.com/"
+    }
+]
