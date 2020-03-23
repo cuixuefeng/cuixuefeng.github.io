@@ -1,15 +1,13 @@
 ---
 layout:     post
-title:      "GGolang中的Memory Model（内存模型）"
+title:      "Golang中的Memory Model（内存模型）"
 subtitle:   " 2020"
-date:       2020-03-23 15:38:33
+date:       2020年03月23日16:33:15
 author:     "cuizhazha"
 header-img: ""
 header-bg-css: "linear-gradient(to right, #24b94a, #38ef7d);"
 catalog: true
 tags:
-    - 2020
-    - MySQL
     - golang
 ---
 
