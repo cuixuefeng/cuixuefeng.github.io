@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "2020年我想起了我的github"
+title:      "高性能的MySQL.1 思维导图"
 subtitle:   " 2020"
 date:       2020-03-23 15:38:33
 author:     "cuizhazha"
@@ -9,14 +9,16 @@ header-bg-css: "linear-gradient(to right, #24b94a, #38ef7d);"
 catalog: true
 tags:
     - 2020
-    - PHP
+    - MySQL
     - golang
 ---
 
 > “Yeah It's on.1 ”
 
 
-## 前言
+## 想起了我还有个博客，打算最近更新一下
 
-cuizhazha
+先从mysql整理开始 ，最近画了一张思维导图
+
+![file-list](http://assets.processon.com/chart_image/5e7415a7e4b06b852fe88ab9.png)
 
