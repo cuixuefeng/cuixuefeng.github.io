@@ -1,8 +1,8 @@
 ---
 layout:     post
-title:      "ThinkPHP 5.1底层源码分析1-初始化"
-subtitle:   " 2020"
-date:       2020年03月25日14:08:28
+title:      "ThinkPHP 5.1底层源码分析1"
+subtitle:   " 初始化核心部分"
+date:       2020-03-25 14:08:28
 author:     "cuizhazha"
 header-img: ""
 header-bg-css: "linear-gradient(to right, #24b94a, #38ef7d);"
