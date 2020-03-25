@@ -1,0 +1,683 @@
+---
+layout:     post
+title:      "ThinkPHP 5.1底层源码分析1-初始化"
+subtitle:   " 2020"
+date:       2020年03月25日14:08:28
+author:     "cuizhazha"
+header-img: ""
+header-bg-css: "linear-gradient(to right, #24b94a, #38ef7d);"
+catalog: true
+tags:
+    - PHP
+---
+
+
+
+## ThinkPHP 5.1底层源码分析1-初始化
+
+TP5.1 和5.0还是有一些区别。  
+
+仅仅针对5.1.6  做了分析
+
+
+
+ThinkPHP5.0以后 主要的架构 包含  **应用核心   框架基础   框架工具 和外部扩展     **
+
+**1 应用核心**
+
+> 应用核心负责应用的整体运行流程
+
+> **应用核心**的实现文件在think\\App.php主要包括：**应用初始化**，**网络请求路由解析**，**应用业务调度**，**输出网络响应对象**
+
+**2 框架基础**
+
+> **框架基础**是框架运行的基础
+
+> 框架基础包括：**网络请求**(think\\Request)，**路由解析**(think\\Route)，**应用层MVC基类**(think\\Controller，Model ,View)，**网络响应**(think\\Response)。
+
+> 框架基础还包括：**配置操作**(think\\Config，Env)，**自动加载**(think\\Loader)，**对象容器**(think\\Container)，**门面调用**(think\\Facade)，**行为钩子**(think\\Hook)，**异常错误处理**(think\\Error，Exception)，**日志记录**(think\\Log)
+
+**3 框架工具**
+
+> **框架工具**是应用业务中常用的基础工具
+
+> 框架工具包括：**命令行**(think\\Console)，**缓存操作**(think\\Cache)，**Cookie操作**(think\\Cookie)，**Session操作**(think\\Session)，**数据集合**(think\\Collection)，**文件上传**(think\\File)，**Url生成**(think\\Url)，**开发调试**(think\\Debug)，**语言包**(think\\Lang)，
+
+**4 扩展模块**
+
+> **扩展模块**是应用业务中常用的功能模块
+
+> 官方扩展：
+
+> php常用扩展：
+
+**5 框架使用**
+
+> **框架使用**是业务层中MVC实现的过程
+
+> 主要包含：路由的规划， 模块的划分，模型的设计，控制器的规划，静态资源的存储，模板的编写
+
+**1 应用核心**
+
+> 应用核心负责应用的整体运行流程
+
+> **应用核心**的实现文件在think\\App.php主要包括：**应用初始化**，**网络请求路由解析**，**应用业务调度**，**输出网络响应对象**
+
+**2 框架基础**
+
+> **框架基础**是框架运行的基础
+
+> 框架基础包括：**网络请求**(think\\Request)，**路由解析**(think\\Route)，**应用层MVC基类**(think\\Controller，Model ,View)，**网络响应**(think\\Response)。
+
+> 框架基础还包括：**配置操作**(think\\Config，Env)，**自动加载**(think\\Loader)，**对象容器**(think\\Container)，**门面调用**(think\\Facade)，**行为钩子**(think\\Hook)，**异常错误处理**(think\\Error，Exception)，**日志记录**(think\\Log)
+
+**3 框架工具**
+
+> **框架工具**是应用业务中常用的基础工具
+
+> 框架工具包括：**命令行**(think\\Console)，**缓存操作**(think\\Cache)，**Cookie操作**(think\\Cookie)，**Session操作**(think\\Session)，**数据集合**(think\\Collection)，**文件上传**(think\\File)，**Url生成**(think\\Url)，**开发调试**(think\\Debug)，**语言包**(think\\Lang)，
+
+**4 扩展模块**
+
+> **扩展模块**是应用业务中常用的功能模块
+
+> 官方扩展：
+
+> php常用扩展：
+
+**5 框架使用**
+
+> **框架使用**是业务层中MVC实现的过程
+
+> 主要包含：路由的规划， 模块的划分，模型的设计，控制器的规划，静态资源的存储，模板的编写
+
+**1 入口文件的作用**
+
+> 入口文件(/public/index.php)主要完成框架的初始化与应用启动，等待用户请求，然后进行调度处理
+
+*****
+
+**2 入口文件的源代码分析**
+
+~~~
+namespace think;
+use Route;
+// 加载基础文件
+require __DIR__ . '/../thinkphp/base.php';
+
+// 支持事先使用静态方法设置Request对象和Config对象
+Route::bind("admin");
+// 执行应用并响应
+Container::get('app')->run()->send();
+~~~
+
+正如前面所说。index.php主要用来完成框架的初始化。加载base.php。注册自动加载与错误处理机制。base.php的具体内容见下一节的 初始化前这里调用Route的bind()将当前请求绑定到admin模块。然后调用容器Container获取app对象，启动应用，处理用来请求，返回请求结果。
+
+*****
+
+**3 入口文件与模块绑定**
+
+在index.php中调用Route的bind可以将设置请求的默认模块参数。在这里模块的默认为被设置为admin.
+
+请求`www.tp5.com/blog/index`。则会转转换为请求`admin/index/index`。
+
+
+
+# 初始化前
+
+**1 初始化前加载的文件**
+
+> base.php (index.php文件中加载）Loader.php (base.php文件中加载)convention.php (base.php文件中加载)
+
+*****
+
+**2 初始化前各个文件的作用**
+
+> 1 base.php 框架基础环境搭建 注册自动加载，注册错误处理，加载默认配置2 Loader.php 自动加载3 convention.php 默认配置
+
+*****
+
+**3 base.php源代码分析**
+
+~~~
+namespace think;
+
+// 载入Loader类
+require __DIR__ . '/library/think/Loader.php';
+
+// 注册自动加载
+Loader::register();
+
+// 注册错误和异常处理机制
+Error::register();
+
+// 实现日志接口
+if (interface_exists('Psr\Log\LoggerInterface')) {
+    interface LoggerInterface extends \Psr\Log\LoggerInterface
+    {}
+} else {
+    interface LoggerInterface
+    {}
+}
+
+// 注册核心类到容器
+Container::getInstance()->bind([
+    'app'                   => App::class,
+    'build'                 => Build::class,
+    'cache'                 => Cache::class,
+    'config'                => Config::class,
+    'cookie'                => Cookie::class,
+    'debug'                 => Debug::class,
+    'env'                   => Env::class,
+    'hook'                  => Hook::class,
+    'lang'                  => Lang::class,
+    'log'                   => Log::class,
+    'request'               => Request::class,
+    'response'              => Response::class,
+    'route'                 => Route::class,
+    'session'               => Session::class,
+    'url'                   => Url::class,
+    'validate'              => Validate::class,
+    'view'                  => View::class,
+    'rule_name'             => route\RuleName::class,
+    'middlewareDispatcher'  => http\middleware\Dispatcher::class,
+    // 接口依赖注入
+    'think\LoggerInterface' => Log::class,
+]);
+
+// 注册核心类的静态代理
+Facade::bind([
+    facade\App::class      => App::class,
+    facade\Build::class    => Build::class,
+    facade\Cache::class    => Cache::class,
+    facade\Config::class   => Config::class,
+    facade\Cookie::class   => Cookie::class,
+    facade\Debug::class    => Debug::class,
+    facade\Env::class      => Env::class,
+    facade\Hook::class     => Hook::class,
+    facade\Lang::class     => Lang::class,
+    facade\Log::class      => Log::class,
+    facade\Request::class  => Request::class,
+    facade\Response::class => Response::class,
+    facade\Route::class    => Route::class,
+    facade\Session::class  => Session::class,
+    facade\Url::class      => Url::class,
+    facade\Validate::class => Validate::class,
+    facade\View::class     => View::class,
+]);
+
+// 注册类库别名
+Loader::addClassAlias([
+    'App'      => facade\App::class,
+    'Build'    => facade\Build::class,
+    'Cache'    => facade\Cache::class,
+    'Config'   => facade\Config::class,
+    'Cookie'   => facade\Cookie::class,
+    'Db'       => Db::class,
+    'Debug'    => facade\Debug::class,
+    'Env'      => facade\Env::class,
+    'Facade'   => Facade::class,
+    'Hook'     => facade\Hook::class,
+    'Lang'     => facade\Lang::class,
+    'Log'      => facade\Log::class,
+    'Request'  => facade\Request::class,
+    'Response' => facade\Response::class,
+    'Route'    => facade\Route::class,
+    'Session'  => facade\Session::class,
+    'Url'      => facade\Url::class,
+    'Validate' => facade\Validate::class,
+    'View'     => facade\View::class,
+]);
+
+// 加载惯例配置文件
+facade\Config::set(include __DIR__ . '/convention.php');
+
+// 加载composer autofile文件
+Loader::loadComposerAutoloadFiles();
+~~~
+
+> 1 注册自动加载**自动加载见 框架工具 自动加载**2 注册错误处理**错误处理见 框架工具 异常错误**3 注册Psr日志接口4 注册核心类 Container::getInstance()->bind()5 注册核心类的静态代理 Facade::bind()
+> **容器和门面 见 框架核心 容器与门面**
+
+*****
+
+**4 convention.php默认配置**
+
+*****
+
+> 主要包含 thinkphp运行的默认配置内容其中的配置字段可以在config目录下进行自定义配置
+
+> 配置的内容一级分类包含
+
+> app 应用运行配置template 模板解析配置log 日志记录配置trace trace调试配置cache 缓存存储配置session session存储配置cookie cookie存储配置databse 数据库连接配置paginate 分页配置
+> # 初始化前
+> **1 初始化前加载的文件**
+> > base.php (index.php文件中加载）Loader.php (base.php文件中加载)convention.php (base.php文件中加载)
+> *****
+> **2 初始化前各个文件的作用**
+> > 1 base.php 框架基础环境搭建 注册自动加载，注册错误处理，加载默认配置2 Loader.php 自动加载3 convention.php 默认配置
+> *****
+> **3 base.php源代码分析**
+> ~~~
+> namespace think;
+> 
+> // 载入Loader类
+> require __DIR__ . '/library/think/Loader.php';
+> 
+> // 注册自动加载
+> Loader::register();
+> 
+> // 注册错误和异常处理机制
+> Error::register();
+> 
+> // 实现日志接口
+> if (interface_exists('Psr\Log\LoggerInterface')) {
+>     interface LoggerInterface extends \Psr\Log\LoggerInterface
+>     {}
+> } else {
+>     interface LoggerInterface
+>     {}
+> }
+> 
+> // 注册核心类到容器
+> Container::getInstance()->bind([
+>     'app'                   => App::class,
+>     'build'                 => Build::class,
+>     'cache'                 => Cache::class,
+>     'config'                => Config::class,
+>     'cookie'                => Cookie::class,
+>     'debug'                 => Debug::class,
+>     'env'                   => Env::class,
+>     'hook'                  => Hook::class,
+>     'lang'                  => Lang::class,
+>     'log'                   => Log::class,
+>     'request'               => Request::class,
+>     'response'              => Response::class,
+>     'route'                 => Route::class,
+>     'session'               => Session::class,
+>     'url'                   => Url::class,
+>     'validate'              => Validate::class,
+>     'view'                  => View::class,
+>     'rule_name'             => route\RuleName::class,
+>     'middlewareDispatcher'  => http\middleware\Dispatcher::class,
+>     // 接口依赖注入
+>     'think\LoggerInterface' => Log::class,
+> ]);
+> 
+> // 注册核心类的静态代理
+> Facade::bind([
+>     facade\App::class      => App::class,
+>     facade\Build::class    => Build::class,
+>     facade\Cache::class    => Cache::class,
+>     facade\Config::class   => Config::class,
+>     facade\Cookie::class   => Cookie::class,
+>     facade\Debug::class    => Debug::class,
+>     facade\Env::class      => Env::class,
+>     facade\Hook::class     => Hook::class,
+>     facade\Lang::class     => Lang::class,
+>     facade\Log::class      => Log::class,
+>     facade\Request::class  => Request::class,
+>     facade\Response::class => Response::class,
+>     facade\Route::class    => Route::class,
+>     facade\Session::class  => Session::class,
+>     facade\Url::class      => Url::class,
+>     facade\Validate::class => Validate::class,
+>     facade\View::class     => View::class,
+> ]);
+> 
+> // 注册类库别名
+> Loader::addClassAlias([
+>     'App'      => facade\App::class,
+>     'Build'    => facade\Build::class,
+>     'Cache'    => facade\Cache::class,
+>     'Config'   => facade\Config::class,
+>     'Cookie'   => facade\Cookie::class,
+>     'Db'       => Db::class,
+>     'Debug'    => facade\Debug::class,
+>     'Env'      => facade\Env::class,
+>     'Facade'   => Facade::class,
+>     'Hook'     => facade\Hook::class,
+>     'Lang'     => facade\Lang::class,
+>     'Log'      => facade\Log::class,
+>     'Request'  => facade\Request::class,
+>     'Response' => facade\Response::class,
+>     'Route'    => facade\Route::class,
+>     'Session'  => facade\Session::class,
+>     'Url'      => facade\Url::class,
+>     'Validate' => facade\Validate::class,
+>     'View'     => facade\View::class,
+> ]);
+> 
+> // 加载惯例配置文件
+> facade\Config::set(include __DIR__ . '/convention.php');
+> 
+> // 加载composer autofile文件
+> Loader::loadComposerAutoloadFiles();
+> ~~~
+> > 1 注册自动加载**自动加载见 框架工具 自动加载**2 注册错误处理**错误处理见 框架工具 异常错误**3 注册Psr日志接口4 注册核心类 Container::getInstance()->bind()5 注册核心类的静态代理 Facade::bind()
+> > **容器和门面 见 框架核心 容器与门面**
+> *****
+> **4 convention.php默认配置**
+> *****
+> > 主要包含 thinkphp运行的默认配置内容其中的配置字段可以在config目录下进行自定义配置
+> > 配置的内容一级分类包含
+> > app 应用运行配置template 模板解析配置log 日志记录配置trace trace调试配置cache 缓存存储配置session session存储配置cookie cookie存储配置databse 数据库连接配置paginate 分页配置
+> > 
+> > # 框架初始化
+> > **1 框架初始化过程**
+> > > 在入口文件(public/index.php)中，完成框架的基础环境搭建后
+> > > 调用容器Container获取app应用对象，然后调用app的run()方法进行框架的整个运行过程。
+> > > 在整个运行过程中，首先进行框架的初始化 包含app的initialize()和init()方法
+> > > 所以框架的初始化在(/library/think/App.php)app的run()方法中完成
+> > *****
+> > **2 初始化**
+> > * [2-1 initialize()](https://www.kancloud.cn/zmwtp/think5/543783#21_initialize_16)
+> > * [2-2 init()](https://www.kancloud.cn/zmwtp/think5/543783#22_init_129)
+> > ## 2-1 initialize()
+> > ~~~
+> > $this->beginTime   = microtime(true);
+> > $this->beginMem    = memory_get_usage();
+> > $this->thinkPath   = dirname(dirname(__DIR__)) . '/';
+> > $this->rootPath    = dirname(realpath($this->appPath)) . '/';
+> > $this->runtimePath = $this->rootPath . 'runtime/';
+> > $this->routePath   = $this->rootPath . 'route/';
+> > $this->configPath  = $this->rootPath . 'config/';
+> > ~~~
+> > > 1 设置运行信息。
+> > > 框架开始运行时，开始运行内存 beginTime，beginMem框架的各个主要目录thinkPath 框架目录rootPath 根目录runtimePath 运行时数据目录routePath 路由配置目录configPath 配置定义目录
+> > ~~~
+> > $this->env->set([
+> >     'think_path'   => $this->thinkPath,
+> >     'root_path'    => $this->rootPath,
+> >     'app_path'     => $this->appPath,
+> >     'config_path'  => $this->configPath,
+> >     'route_path'   => $this->routePath,
+> >     'runtime_path' => $this->runtimePath,
+> >     'extend_path'  => $this->rootPath . 'extend/',
+> >     'vendor_path'  => $this->rootPath . 'vendor/',
+> > ]);
+> > ~~~
+> > > 2 存储目录参数到env属性中
+> > > think\_path 框架目录root\_path 根目录app\_path 应用目录config\_path 配置文件目录route\_path 路由配置目录runtime\_path 运行时数据目录extend\_path 自动加载目录vendor 扩展目录
+> > ~~~
+> > if (is_file($this->rootPath . '.env')) {
+> >     $this->env->load($this->rootPath . '.env');
+> > }
+> > ~~~
+> > > 3 读取根目录下的.env文件 加载环境配置变量到env属性
+> > ~~~
+> > $this->namespace = $this->env->get('app_namespace', $this->namespace);
+> > $this->env->set('app_namespace', $this->namespace);
+> > Loader::addNamespace($this->namespace, $this->appPath);
+> > ~~~
+> > > 4 读取.env设置的app\_namespace命名空间名称，如果没有配置，则读取app的namespace属性。默认为app
+> > > 然后设置env的app\_namespace为应用命名空间名称app调用Loader的addNamespace注册命名空间名称app与应用目录/app的对应关系
+> > ~~~
+> > $this->configExt = $this->env->get('config_ext', '.php');
+> > ~~~
+> > > 5 读取配置文件后缀 默认为.php
+> > ~~~
+> > $this->init();
+> > ~~~
+> > > 6 应用初始化。初始化过程init()见下面
+> > ~~~
+> > $this->suffix = $this->config('app.class_suffix');
+> > ~~~
+> > > 7 获取类名后缀是否开启，默认不开启。开启是控制器和模型文件的文件名需要加上对应后缀
+> > ~~~
+> > $this->debug = $this->env->get('app_debug', $this->config('app.app_debug'));
+> > $this->env->set('app_debug', $this->debug);
+> > 
+> > if (!$this->debug) {
+> >     ini_set('display_errors', 'Off');
+> > } elseif (PHP_SAPI != 'cli') {
+> >     //重新申请一块比较大的buffer
+> >     if (ob_get_level() > 0) {
+> >         $output = ob_get_clean();
+> >     }
+> >     ob_start();
+> >     if (!empty($output)) {
+> >         echo $output;
+> >     }
+> > }
+> > ~~~
+> > > 8 应用调试模式的开启
+> > ~~~
+> > if (!empty($this->config('app.root_namespace'))) {
+> >     Loader::addNamespace($this->config('app.root_namespace'));
+> > }
+> > 
+> > Loader::addClassAlias($this->config->pull('alias'));
+> > ~~~
+> > > 9 注册命名空间与目录的对应 注册文件名与别名的对应关系
+> > ~~~
+> > date_default_timezone_set($this->config('app.default_timezone'));
+> > $this->loadLangPack();
+> > ~~~
+> > > 10 设置系统时区和加载语言包
+> > ~~~
+> > $this->hook->listen('app_init');
+> > ~~~
+> > > 11 调用注册的app\_init回调
+> > ## 2-2 init()
+> > > 0 在initialize()中调用init()进行应用的初始化
+> > > init()传入参数时，初始化对应的模块。参数为空时初始化整个应用。
+> > > 这里没有传入参数，进行整个应用的初始化
+> > ~~~
+> > $module = $module ? $module . DIRECTORY_SEPARATOR : '';
+> > $path   = $this->appPath . $module;
+> > ~~~
+> > > 1 进行初始化的目录 这里是应用的根目录/app/
+> > ~~~
+> > if (is_file($path . 'init.php')) {
+> >     include $path . 'init.php';
+> > } elseif (is_file($this->runtimePath . $module . 'init.php')) {
+> >     include $this->runtimePath . $module . 'init.php';
+> > } else {
+> >     // 加载行为扩展文件
+> >     if (is_file($path . 'tags.php')) {
+> >         $this->hook->import(include $path . 'tags.php');
+> >     }
+> > 
+> >     // 加载公共文件
+> >     if (is_file($path . 'common.php')) {
+> >         include $path . 'common.php';
+> >     }
+> > 
+> >     if ('' == $module) {
+> >         // 加载系统助手函数
+> >         include $this->thinkPath . 'helper.php';
+> >     }
+> > 
+> >     // 注册服务的容器对象实例
+> >     if (is_file($path . 'provider.php')) {
+> >         $this->container->bind(include $path . 'provider.php');
+> >     }
+> > 
+> >     // 自动读取配置文件
+> >     if (is_dir($path . 'config')) {
+> >         $dir = $path . 'config';
+> >     } elseif (is_dir($this->configPath . $module)) {
+> >         $dir = $this->configPath . $module;
+> >     }
+> > 
+> >     $files = isset($dir) ? scandir($dir) : [];
+> > 
+> >     foreach ($files as $file) {
+> >         if ('.' . pathinfo($file, PATHINFO_EXTENSION) === $this->configExt) {
+> >             $filename = $dir . DIRECTORY_SEPARATOR . $file;
+> >             $this->config->load($filename, pathinfo($file, PATHINFO_FILENAME));
+> >         }
+> >     }
+> > }
+> > ~~~
+> > > 2 读取/app/init.php的初始化配置/app/init.php不存在时，则读取运行时目录/runtime/init.php文
+> > > 如果不存在init.php文件，则读取其他配置文件
+> > > 其他配置文件包括 ：
+> > > 行为扩展 /app/tags.php.公共内容文件 /app/common.php助手函数文件 /app/helper.php容器对象注册文件 /app/provider.php读取配置目录下的配置文件 /app/config/xx.php。注册配置内容
+> > ~~~
+> > $this->request->filter($this->config('app.default_filter'));
+> > ~~~
+> > > 3 设置全局请求过滤方法
+> > *****
+> > **3 请求调度与创建响应**
+> > > 在app的run()方法中框架初始化后，开始进行请求调度调度分派，执行应用对应的业务逻辑，根据业务逻辑的处理结果，创建相应的响应对象
+> > > # 框架初始化
+> > > **1 框架初始化过程**
+> > > > 在入口文件(public/index.php)中，完成框架的基础环境搭建后
+> > > > 调用容器Container获取app应用对象，然后调用app的run()方法进行框架的整个运行过程。
+> > > > 在整个运行过程中，首先进行框架的初始化 包含app的initialize()和init()方法
+> > > > 所以框架的初始化在(/library/think/App.php)app的run()方法中完成
+> > > *****
+> > > **2 初始化**
+> > > * [2-1 initialize()](https://www.kancloud.cn/zmwtp/think5/543783#21_initialize_16)
+> > > * [2-2 init()](https://www.kancloud.cn/zmwtp/think5/543783#22_init_129)
+> > > ## 2-1 initialize()
+> > > ~~~
+> > > $this->beginTime   = microtime(true);
+> > > $this->beginMem    = memory_get_usage();
+> > > $this->thinkPath   = dirname(dirname(__DIR__)) . '/';
+> > > $this->rootPath    = dirname(realpath($this->appPath)) . '/';
+> > > $this->runtimePath = $this->rootPath . 'runtime/';
+> > > $this->routePath   = $this->rootPath . 'route/';
+> > > $this->configPath  = $this->rootPath . 'config/';
+> > > ~~~
+> > > > 1 设置运行信息。
+> > > > 框架开始运行时，开始运行内存 beginTime，beginMem框架的各个主要目录thinkPath 框架目录rootPath 根目录runtimePath 运行时数据目录routePath 路由配置目录configPath 配置定义目录
+> > > ~~~
+> > > $this->env->set([
+> > >     'think_path'   => $this->thinkPath,
+> > >     'root_path'    => $this->rootPath,
+> > >     'app_path'     => $this->appPath,
+> > >     'config_path'  => $this->configPath,
+> > >     'route_path'   => $this->routePath,
+> > >     'runtime_path' => $this->runtimePath,
+> > >     'extend_path'  => $this->rootPath . 'extend/',
+> > >     'vendor_path'  => $this->rootPath . 'vendor/',
+> > > ]);
+> > > ~~~
+> > > > 2 存储目录参数到env属性中
+> > > > think\_path 框架目录root\_path 根目录app\_path 应用目录config\_path 配置文件目录route\_path 路由配置目录runtime\_path 运行时数据目录extend\_path 自动加载目录vendor 扩展目录
+> > > ~~~
+> > > if (is_file($this->rootPath . '.env')) {
+> > >     $this->env->load($this->rootPath . '.env');
+> > > }
+> > > ~~~
+> > > > 3 读取根目录下的.env文件 加载环境配置变量到env属性
+> > > ~~~
+> > > $this->namespace = $this->env->get('app_namespace', $this->namespace);
+> > > $this->env->set('app_namespace', $this->namespace);
+> > > Loader::addNamespace($this->namespace, $this->appPath);
+> > > ~~~
+> > > > 4 读取.env设置的app\_namespace命名空间名称，如果没有配置，则读取app的namespace属性。默认为app
+> > > > 然后设置env的app\_namespace为应用命名空间名称app调用Loader的addNamespace注册命名空间名称app与应用目录/app的对应关系
+> > > ~~~
+> > > $this->configExt = $this->env->get('config_ext', '.php');
+> > > ~~~
+> > > > 5 读取配置文件后缀 默认为.php
+> > > ~~~
+> > > $this->init();
+> > > ~~~
+> > > > 6 应用初始化。初始化过程init()见下面
+> > > ~~~
+> > > $this->suffix = $this->config('app.class_suffix');
+> > > ~~~
+> > > > 7 获取类名后缀是否开启，默认不开启。开启是控制器和模型文件的文件名需要加上对应后缀
+> > > ~~~
+> > > $this->debug = $this->env->get('app_debug', $this->config('app.app_debug'));
+> > > $this->env->set('app_debug', $this->debug);
+> > > 
+> > > if (!$this->debug) {
+> > >     ini_set('display_errors', 'Off');
+> > > } elseif (PHP_SAPI != 'cli') {
+> > >     //重新申请一块比较大的buffer
+> > >     if (ob_get_level() > 0) {
+> > >         $output = ob_get_clean();
+> > >     }
+> > >     ob_start();
+> > >     if (!empty($output)) {
+> > >         echo $output;
+> > >     }
+> > > }
+> > > ~~~
+> > > > 8 应用调试模式的开启
+> > > ~~~
+> > > if (!empty($this->config('app.root_namespace'))) {
+> > >     Loader::addNamespace($this->config('app.root_namespace'));
+> > > }
+> > > 
+> > > Loader::addClassAlias($this->config->pull('alias'));
+> > > ~~~
+> > > > 9 注册命名空间与目录的对应 注册文件名与别名的对应关系
+> > > ~~~
+> > > date_default_timezone_set($this->config('app.default_timezone'));
+> > > $this->loadLangPack();
+> > > ~~~
+> > > > 10 设置系统时区和加载语言包
+> > > ~~~
+> > > $this->hook->listen('app_init');
+> > > ~~~
+> > > > 11 调用注册的app\_init回调
+> > > ## 2-2 init()
+> > > > 0 在initialize()中调用init()进行应用的初始化
+> > > > init()传入参数时，初始化对应的模块。参数为空时初始化整个应用。
+> > > > 这里没有传入参数，进行整个应用的初始化
+> > > ~~~
+> > > $module = $module ? $module . DIRECTORY_SEPARATOR : '';
+> > > $path   = $this->appPath . $module;
+> > > ~~~
+> > > > 1 进行初始化的目录 这里是应用的根目录/app/
+> > > ~~~
+> > > if (is_file($path . 'init.php')) {
+> > >     include $path . 'init.php';
+> > > } elseif (is_file($this->runtimePath . $module . 'init.php')) {
+> > >     include $this->runtimePath . $module . 'init.php';
+> > > } else {
+> > >     // 加载行为扩展文件
+> > >     if (is_file($path . 'tags.php')) {
+> > >         $this->hook->import(include $path . 'tags.php');
+> > >     }
+> > > 
+> > >     // 加载公共文件
+> > >     if (is_file($path . 'common.php')) {
+> > >         include $path . 'common.php';
+> > >     }
+> > > 
+> > >     if ('' == $module) {
+> > >         // 加载系统助手函数
+> > >         include $this->thinkPath . 'helper.php';
+> > >     }
+> > > 
+> > >     // 注册服务的容器对象实例
+> > >     if (is_file($path . 'provider.php')) {
+> > >         $this->container->bind(include $path . 'provider.php');
+> > >     }
+> > > 
+> > >     // 自动读取配置文件
+> > >     if (is_dir($path . 'config')) {
+> > >         $dir = $path . 'config';
+> > >     } elseif (is_dir($this->configPath . $module)) {
+> > >         $dir = $this->configPath . $module;
+> > >     }
+> > > 
+> > >     $files = isset($dir) ? scandir($dir) : [];
+> > > 
+> > >     foreach ($files as $file) {
+> > >         if ('.' . pathinfo($file, PATHINFO_EXTENSION) === $this->configExt) {
+> > >             $filename = $dir . DIRECTORY_SEPARATOR . $file;
+> > >             $this->config->load($filename, pathinfo($file, PATHINFO_FILENAME));
+> > >         }
+> > >     }
+> > > }
+> > > ~~~
+> > > > 2 读取/app/init.php的初始化配置/app/init.php不存在时，则读取运行时目录/runtime/init.php文
+> > > > 如果不存在init.php文件，则读取其他配置文件
+> > > > 其他配置文件包括 ：
+> > > > 行为扩展 /app/tags.php.公共内容文件 /app/common.php助手函数文件 /app/helper.php容器对象注册文件 /app/provider.php读取配置目录下的配置文件 /app/config/xx.php。注册配置内容
+> > > ~~~
+> > > $this->request->filter($this->config('app.default_filter'));
+> > > ~~~
+> > > > 3 设置全局请求过滤方法
+> > > *****
+> > > **3 请求调度与创建响应**
+> > > > 在app的run()方法中框架初始化后，开始进行请求调度调度分派，执行应用对应的业务逻辑，根据业务逻辑的处理结果，创建相应的响应对象
